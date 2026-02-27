@@ -82,19 +82,20 @@ model Profile {
 }
 
 model TeeTime {
-  id                 String   @id @default(cuid())
-  courseName         String
-  courseCity         String
-  courseState        String
-  latitude           Float?
-  longitude          Float?
-  teeTime            DateTime
-  costPerSlot        Int
-  slotsTotal         Int
-  slotsTaken         Int      @default(0)
-  sellerId           String
-  contactPreference  String   @default("website") // "email" | "phone" | "website"
-  createdAt          DateTime @default(now())
+  id                  String   @id @default(cuid())
+  courseName          String
+  courseCity          String
+  courseState         String
+  latitude            Float?
+  longitude           Float?
+  teeTime             DateTime
+  coursePricePerSlot  Int      // What you pay at the golf course
+  sellerPricePerSlot  Int      // What buyer pays the seller for the slot
+  slotsTotal          Int
+  slotsTaken          Int      @default(0)
+  sellerId            String
+  contactPreference   String   @default("website") // "email" | "phone" | "website"
+  createdAt           DateTime @default(now())
 
   seller   User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   messages Message[]

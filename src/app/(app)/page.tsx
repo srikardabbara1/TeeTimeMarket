@@ -11,7 +11,8 @@ interface TeeTime {
   courseCity: string;
   courseState: string;
   teeTime: string;
-  costPerSlot: number;
+  coursePricePerSlot: number;
+  sellerPricePerSlot: number;
   slotsTotal: number;
   slotsTaken: number;
   contactPreference?: string;
@@ -31,21 +32,38 @@ export default function MarketplacePage() {
   });
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [contactModalTeeTime, setContactModalTeeTime] = useState<TeeTime | null>(null);
 
   useEffect(() => {
     async function loadTeeTimes() {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (filters.golfers) params.set("golfers", filters.golfers);
-      if (filters.city) params.set("city", filters.city);
-      if (filters.state) params.set("state", filters.state);
-       if (filters.course) params.set("course", filters.course);
-      const res = await fetch(`/api/tee-times?${params}`);
-      const data = await res.json();
-      let list: TeeTime[] = Array.isArray(data) ? data : [];
+      setLoadError(null);
+      try {
+        const params = new URLSearchParams();
+        if (filters.golfers) params.set("golfers", filters.golfers);
+        if (filters.city) params.set("city", filters.city);
+        if (filters.state) params.set("state", filters.state);
+        if (filters.course) params.set("course", filters.course);
+        const res = await fetch(`/api/tee-times?${params}`);
+        const data = await res.json();
+        if (!res.ok) {
+          setLoadError(data.error || `Failed to load tee times (${res.status})`);
+          setTeeTimes([]);
+          setLoading(false);
+          return;
+        }
+        let list: TeeTime[] = Array.isArray(data) ? data : [];
+        list = list.map((t) => {
+          const any = t as Record<string, unknown>;
+          return {
+            ...t,
+            coursePricePerSlot: any.coursePricePerSlot ?? any.costPerSlot ?? 0,
+            sellerPricePerSlot: any.sellerPricePerSlot ?? any.costPerSlot ?? 0,
+          } as TeeTime;
+        });
 
-      if (userLocation && filters.maxDistanceMiles) {
+        if (userLocation && filters.maxDistanceMiles) {
         const maxMiles = parseFloat(filters.maxDistanceMiles);
         if (!Number.isNaN(maxMiles) && maxMiles > 0) {
           list = list.filter((t) => {
@@ -62,9 +80,13 @@ export default function MarketplacePage() {
             return d <= maxMiles;
           });
         }
-      }
+        }
 
-      setTeeTimes(list);
+        setTeeTimes(list);
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : "Failed to load tee times");
+        setTeeTimes([]);
+      }
       setLoading(false);
     }
     loadTeeTimes();
@@ -231,6 +253,14 @@ export default function MarketplacePage() {
         </div>
       </div>
 
+      {loadError && (
+        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {loadError}
+          <p className="mt-2 text-xs text-red-600">
+            Try restarting the dev server. If you recently updated the database schema, run <code className="bg-red-100 px-1 rounded">npx prisma generate</code> and restart.
+          </p>
+        </div>
+      )}
       {loading ? (
         <div className="text-center py-16 text-gray-500">Loading tee times...</div>
       ) : teeTimes.length === 0 ? (
@@ -265,8 +295,12 @@ export default function MarketplacePage() {
                   <span className="font-medium">Time:</span> {formatTime(t.teeTime)}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium">Cost:</span>{" "}
-                  {formatCost(t.costPerSlot)} per slot
+                  <span className="font-medium">Course price:</span>{" "}
+                  {formatCost(t.coursePricePerSlot)} per slot
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Seller price:</span>{" "}
+                  {formatCost(t.sellerPricePerSlot)} per slot
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">Slots available:</span>{" "}

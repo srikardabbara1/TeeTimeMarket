@@ -40,6 +40,8 @@ export async function POST() {
       for (let h = 7; h <= 14; h += 2) {
         const teeTime = new Date(date);
         teeTime.setHours(h, 0, 0, 0);
+        const coursePrice = Math.floor(4000 + Math.random() * 4000);
+        const sellerPrice = coursePrice + Math.floor(1000 + Math.random() * 3000);
         await prisma.teeTime.create({
           data: {
             courseName: course.name,
@@ -48,7 +50,8 @@ export async function POST() {
             latitude: course.lat,
             longitude: course.lng,
             teeTime,
-            costPerSlot: Math.floor(4000 + Math.random() * 6000),
+            coursePricePerSlot: coursePrice,
+            sellerPricePerSlot: sellerPrice,
             slotsTotal: 4,
             slotsTaken: Math.floor(Math.random() * 2),
             sellerId: seller.id,

@@ -13,7 +13,8 @@ export default function NewListingPage() {
     courseCity: "",
     courseState: "",
     teeTime: "",
-    costPerSlot: "",
+    coursePricePerSlot: "",
+    sellerPricePerSlot: "",
     slotsTotal: "4",
     contactPreference: "website",
   });
@@ -55,7 +56,8 @@ export default function NewListingPage() {
         courseCity: form.courseCity,
         courseState: form.courseState,
         teeTime: form.teeTime,
-        costPerSlot: parseFloat(form.costPerSlot),
+        coursePricePerSlot: parseFloat(form.coursePricePerSlot),
+        sellerPricePerSlot: parseFloat(form.sellerPricePerSlot),
         slotsTotal: parseInt(form.slotsTotal, 10),
         contactPreference: form.contactPreference,
       }),
@@ -148,24 +150,49 @@ export default function NewListingPage() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Cost per slot ($)
+              Course price per slot ($)
             </label>
+            <p className="text-xs text-gray-500 mb-1">
+              What the golf course charges for this tee time.
+            </p>
             <input
               type="number"
               step="0.01"
               min="0"
-              value={form.costPerSlot}
+              value={form.coursePricePerSlot}
               onChange={(e) =>
-                setForm((f) => ({ ...f, costPerSlot: e.target.value }))
+                setForm((f) => ({ ...f, coursePricePerSlot: e.target.value }))
               }
               placeholder="e.g. 75.00"
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Your price per slot ($)
+            </label>
+            <p className="text-xs text-gray-500 mb-1">
+              What the buyer pays you for the slot.
+            </p>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.sellerPricePerSlot}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, sellerPricePerSlot: e.target.value }))
+              }
+              placeholder="e.g. 100.00"
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+              required
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Total slots
