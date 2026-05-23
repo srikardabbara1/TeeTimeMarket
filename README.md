@@ -2,6 +2,7 @@
 
 A marketplace for buying and selling golf tee times. Users can create accounts, add their location and golfer count preferences in their profile, browse tee times near them, and list tee times for sale.
 
+
 ## Features
 
 - **Authentication**: Sign up and sign in
